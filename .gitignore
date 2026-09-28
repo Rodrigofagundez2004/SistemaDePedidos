@@ -1,0 +1,18 @@
+# Go
+backend/**/bin/
+backend/**/*.exe
+*.test
+
+# Node / React
+frontend/node_modules/
+frontend/dist/
+frontend/.env.local
+
+# Env
+.env
+*.env.local
+
+# IDE
+.vscode/
+.idea/
+.DS_Store
