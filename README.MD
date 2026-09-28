@@ -1,12 +1,29 @@
 ## Modelo de datos
-  Servicio DE PRODUCTS (Base de datos independiente)
-![Diagrama ER](1.1.JPG)
-  Servicio de USERS (base de datos independiente)
-![Diagrama ER](1.2.JPG)
-  Servicio de ORDERS (base de datos independiente)
-![Diagrama ER](1.3.JPG)
-  Servicio de PAYMENTS (base de datos independiente)
-![Diagrama ER](1.4.JPG)
 
-El modelo está separado por microservicio. Las relaciones entre servicios
-son referencias lógicas (por ID), no foreign keys físicas.
+El modelo está separado por microservicio. Cada servicio tiene su propia base de datos,
+y las relaciones entre servicios son **referencias lógicas** (por ID), no *foreign keys* físicas.
+Esto permite que cada servicio evolucione su esquema de forma independiente.
+
+### Servicio de Products
+
+Gestiona el catálogo, las categorías y las reservas de stock.
+
+![Diagrama ER - Products](1.1.JPG)
+
+### Servicio de Users
+
+Gestiona usuarios, autenticación y roles.
+
+![Diagrama ER - Users](1.2.JPG)
+
+### Servicio de Orders
+
+Gestiona las órdenes, sus ítems y el historial de estados.
+
+![Diagrama ER - Orders](1.3.JPG)
+
+### Servicio de Payments
+
+Gestiona los pagos asociados a cada orden, con soporte para idempotencia.
+
+![Diagrama ER - Payments](1.4.JPG)
