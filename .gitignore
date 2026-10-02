@@ -1,4 +1,5 @@
 # Go
+backend/.env
 backend/**/bin/
 backend/**/*.exe
 *.test

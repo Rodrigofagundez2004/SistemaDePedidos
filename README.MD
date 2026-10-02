@@ -1,3 +1,13 @@
+
+
+
+
+
+
+
+
+
+
 ## Modelo de datos
 
 El modelo está separado por microservicio. Cada servicio tiene su propia base de datos,
@@ -8,22 +18,22 @@ Esto permite que cada servicio evolucione su esquema de forma independiente.
 
 Gestiona el catálogo, las categorías y las reservas de stock.
 
-![Diagrama ER - Products](1.1.JPG)
+![Diagrama ER - Products](images/1.1.JPG)
 
 ### Servicio de Users
 
 Gestiona usuarios, autenticación y roles.
 
-![Diagrama ER - Users](1.2.JPG)
+![Diagrama ER - Users](images/1.2.JPG)
 
 ### Servicio de Orders
 
 Gestiona las órdenes, sus ítems y el historial de estados.
 
-![Diagrama ER - Orders](1.3.JPG)
+![Diagrama ER - Orders](images/1.3.JPG)
 
 ### Servicio de Payments
 
 Gestiona los pagos asociados a cada orden, con soporte para idempotencia.
 
-![Diagrama ER - Payments](1.4.JPG)
+![Diagrama ER - Payments](images/1.4.JPG)
