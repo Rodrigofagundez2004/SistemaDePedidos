@@ -10,15 +10,15 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/RodrigoFagundez2004/SistemaDePedidos/backend/internal/config"
+	"github.com/RodrigoFagundez2004/SistemaDePedidos/backend/internal/database"
+	"github.com/RodrigoFagundez2004/SistemaDePedidos/backend/internal/middleware"
+	"github.com/RodrigoFagundez2004/SistemaDePedidos/backend/internal/orders"
+	"github.com/RodrigoFagundez2004/SistemaDePedidos/backend/internal/payments"
+	"github.com/RodrigoFagundez2004/SistemaDePedidos/backend/internal/products"
+	"github.com/RodrigoFagundez2004/SistemaDePedidos/backend/internal/users"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/rf4tc/sistema-de-pedidos/backend/internal/config"
-	"github.com/rf4tc/sistema-de-pedidos/backend/internal/database"
-	"github.com/rf4tc/sistema-de-pedidos/backend/internal/middleware"
-	"github.com/rf4tc/sistema-de-pedidos/backend/internal/orders"
-	"github.com/rf4tc/sistema-de-pedidos/backend/internal/payments"
-	"github.com/rf4tc/sistema-de-pedidos/backend/internal/products"
-	"github.com/rf4tc/sistema-de-pedidos/backend/internal/users"
 )
 
 func main() {
