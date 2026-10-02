@@ -1,6 +1,8 @@
 package users
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
@@ -19,8 +21,8 @@ func (h *Handler) RegisterRoutes(rg *gin.RouterGroup) {
 		group.GET("/ping", h.Ping)
 	}
 }
-func (h *Handler) Ping(c *gin.Context)
-{
+func (h *Handler) Ping(c *gin.Context) {
+
 	sqlDB, err := h.db.DB()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get database connection"})

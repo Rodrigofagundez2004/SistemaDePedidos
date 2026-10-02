@@ -1,4 +1,4 @@
-package orders
+package payments
 
 import (
 	"net/http"
@@ -17,7 +17,7 @@ func NewHandler(db *gorm.DB) *Handler {
 func (h *Handler) RegisterRoutes(rg *gin.RouterGroup) {
 	group := rg.Group("/payments")
 	{
-		group.Get("/ping", h.Ping)
+		group.GET("/ping", h.Ping)
 	}
 }
 func (h *Handler) Ping(c *gin.Context) {

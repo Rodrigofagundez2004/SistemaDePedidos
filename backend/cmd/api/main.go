@@ -34,6 +34,7 @@ func main() {
 	// 2. Cargar configuración desde .env
 	// ---------------------------------------------------------
 	cfg, err := config.Load()
+	slog.Info("debug", "pass_len", len(cfg.DBPassword), "host", cfg.DBHost)
 	if err != nil {
 		slog.Error("error cargando configuración", "error", err)
 		os.Exit(1)
