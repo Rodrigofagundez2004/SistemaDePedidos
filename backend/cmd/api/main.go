@@ -81,7 +81,7 @@ func main() {
 	// ---------------------------------------------------------
 	api := router.Group("/api/v1")
 
-	users.NewHandler(conns.Users).RegisterRoutes(api)
+	users.NewHandler(conns.Users, cfg.JWTSecret, cfg.JWTExpirationHour).RegisterRoutes(api)
 	products.NewHandler(conns.Products).RegisterRoutes(api)
 	orders.NewHandler(conns.Orders).RegisterRoutes(api)
 	payments.NewHandler(conns.Payments).RegisterRoutes(api)

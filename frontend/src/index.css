@@ -1,111 +1,291 @@
-:root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+/* ============================================
+   RESET Y BASE
+   ============================================ */
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
-
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
-}
-
-#root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
+* {
   box-sizing: border-box;
 }
 
 body {
+  font-family: system-ui, -apple-system, sans-serif;
   margin: 0;
+  color: #333;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(150, 200, 255, 0.25) 0%, transparent 40%),
+    radial-gradient(circle at 80% 80%, rgba(100, 150, 255, 0.2) 0%, transparent 40%),
+    linear-gradient(135deg, #e0f0ff 0%, #c7e0ff 50%, #b3d4ff 100%);
+  background-attachment: fixed;
 }
 
-h1,
-h2 {
-  font-family: var(--heading);
+/* ============================================
+   LOGIN / REGISTER
+   ============================================ */
+.app-title {
+  margin: 0 0 8px 0;
+  font-size: 28px;
+  text-align: center;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  background: linear-gradient(
+    90deg,
+    #e00635 0%,
+    #6b1d1a 15%,
+    #e20b0b 35%,
+    #f00b0b 50%,
+    #f30909 65%,
+    #da0812 85%,
+    #ec1707 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  animation: shimmer 3s linear infinite;
+}
+
+
+.page-title {
+  margin: 0 0 20px 0;
+  font-size: 18px;
+  text-align: center;
+  color: #5a6b85;
+  font-weight: 400;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 0% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .app-title {
+    animation: none;
+    background: none;
+    -webkit-text-fill-color: #1a3a6b;
+    color: #1a3a6b;
+  }
+}
+
+.auth-container {
+  max-width: 400px;
+  margin: 80px auto;
+  padding: 32px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow:
+    0 4px 20px rgba(100, 150, 255, 0.15),
+    0 0 40px rgba(150, 200, 255, 0.3);
+}
+
+
+
+.auth-container form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.auth-container input {
+  padding: 12px;
+  border: 1px solid rgba(120, 180, 255, 0.4);
+  border-radius: 8px;
+  font-size: 14px;
+  background: rgba(255, 255, 255, 0.7);
+  color: #333;
+  transition: all 0.2s ease;
+}
+
+.auth-container input::placeholder {
+  color: #99a8c0;
+}
+
+.auth-container input:focus {
+  outline: none;
+  border-color: #7db9ff;
+  background: white;
+  box-shadow:
+    0 0 0 3px rgba(125, 185, 255, 0.15),
+    0 0 15px rgba(125, 185, 255, 0.3);
+}
+
+.auth-container button {
+  padding: 12px;
+  background: linear-gradient(135deg, #4a90e2, #357abd);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 2px 8px rgba(74, 144, 226, 0.25);
+  margin-top: 8px;
+}
+
+.auth-container button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, #5aa0f2, #4a90e2);
+  box-shadow:
+    0 6px 20px rgba(74, 144, 226, 0.5),
+    0 0 30px rgba(120, 180, 255, 0.4);
+}
+
+.auth-container button:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow:
+    0 2px 6px rgba(74, 144, 226, 0.4),
+    0 0 12px rgba(120, 180, 255, 0.3);
+}
+
+.auth-container button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.auth-container p {
+  font-size: 14px;
+  text-align: center;
+  color: #5a6b85;
+  margin-top: 20px;
+}
+
+.auth-container a {
+  color: #357abd;
+  text-decoration: none;
   font-weight: 500;
-  color: var(--text-h);
+  transition: color 0.2s ease;
 }
 
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
+.auth-container a:hover {
+  color: #4a90e2;
+  text-decoration: underline;
 }
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
-}
-p {
+
+/* ============================================
+   ERRORES
+   ============================================ */
+
+.error {
+  color: #d32f2f;
+  font-size: 13px;
   margin: 0;
-}
-
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
+  padding: 8px 12px;
+  background: rgba(211, 47, 47, 0.08);
+  border-left: 3px solid #d32f2f;
   border-radius: 4px;
-  color: var(--text-h);
 }
 
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
+/* ============================================
+   DASHBOARD
+   ============================================ */
+
+.dashboard-container {
+  max-width: 700px;
+  margin: 40px auto;
+  padding: 24px;
+}
+
+.dashboard-container header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 16px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid rgba(120, 180, 255, 0.3);
+}
+
+.dashboard-container header h1 {
+  margin: 0;
+  font-size: 24px;
+  color: #1a3a6b;
+}
+
+.dashboard-container header button {
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #d32f2f, #b71c1c);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 2px 8px rgba(211, 47, 47, 0.25);
+}
+
+.dashboard-container header button:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, #e53935, #d32f2f);
+  box-shadow:
+    0 6px 20px rgba(211, 47, 47, 0.5),
+    0 0 30px rgba(255, 100, 100, 0.4);
+}
+
+.dashboard-container header button:active {
+  transform: translateY(0);
+  box-shadow:
+    0 2px 6px rgba(211, 47, 47, 0.4),
+    0 0 12px rgba(255, 100, 100, 0.3);
+}
+
+.dashboard-container section {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 2px 10px rgba(100, 150, 255, 0.1);
+}
+
+.dashboard-container section h2 {
+  margin-top: 0;
+  color: #1a3a6b;
+}
+
+.dashboard-container section h3 {
+  margin-top: 0;
+  font-size: 16px;
+  color: #5a6b85;
+}
+
+.dashboard-container section p {
+  color: #5a6b85;
+  margin: 8px 0;
+}
+
+/* ============================================
+   FIELDS DEL DASHBOARD
+   ============================================ */
+
+.field {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(120, 180, 255, 0.15);
+}
+
+.field:last-child {
+  border-bottom: none;
+}
+
+.field .label {
+  color: #7a8aa5;
+  font-size: 14px;
+}
+
+.field .value {
+  font-weight: 500;
+  color: #1a3a6b;
 }
