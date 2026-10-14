@@ -30,7 +30,7 @@ export default function Login() {
 
   return (
     <div className="auth-container">
-    <h1 className="app-title">Sistema de Pedidos</h1>
+    <h1 className="app-title">RodriShop</h1>
     <h2 className="page-title">Iniciar sesión</h2>
       <form onSubmit={handleSubmit}>
         <input

@@ -12,12 +12,11 @@ body {
   color: #333;
   min-height: 100vh;
   background:
-    radial-gradient(circle at 20% 20%, rgba(150, 200, 255, 0.25) 0%, transparent 40%),
-    radial-gradient(circle at 80% 80%, rgba(100, 150, 255, 0.2) 0%, transparent 40%),
-    linear-gradient(135deg, #e0f0ff 0%, #c7e0ff 50%, #b3d4ff 100%);
+    radial-gradient(circle at 20% 20%, rgba(255, 200, 220, 0.35) 0%, transparent 40%),
+    radial-gradient(circle at 80% 80%, rgba(255, 180, 210, 0.3) 0%, transparent 40%),
+    linear-gradient(135deg, #f8e9ee 0%, #ffe0eb 50%, #ffd0e0 100%);
   background-attachment: fixed;
 }
-
 /* ============================================
    LOGIN / REGISTER
    ============================================ */
@@ -119,7 +118,7 @@ body {
 
 .auth-container button {
   padding: 12px;
-  background: linear-gradient(135deg, #4a90e2, #357abd);
+  background: linear-gradient(135deg, #0e0e0f, #0a0c0e);
   color: white;
   border: none;
   border-radius: 8px;

@@ -29,5 +29,32 @@ func (r *Repository) FindByIDl(id string) (*Payment, error)
 	return &p, nil
 }
 func (r *Repository) FindByIdempotencyKey(key string) (*Payment, error) {
+	var p Payment
+	if err := r.db.Where("idempotency_key = ?" , key ).First(&p).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ErrPaymentNotFoundDB
+		}
+		return nil, err
+	}
+	return &p, nil
 	 
+}
+func (r *Repository) ListByOrder(orderID string) ([]Payment, error)
+{
+	var payments []Payment
+	if err := r.db.Where("order_id = ?", orderID).Order("created_at DESC").Find(&payments).Error
+	if err != nil {
+		return nil, err
+	}
+	return payments, nil
+
+
+}
+func (r *Repository) ListByOrderAsc(orderID string ) ([]Payment, error) {
+	var payment []Payment
+	if err := r.db.Where("order_id = ?", orderID).Order("created_at ASC").Find(%payments).Error 
+	if err != nil {
+		return nil. err
+	}
+	return payments, nil
 }
