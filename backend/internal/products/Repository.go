@@ -12,7 +12,6 @@ var ErrPrdouctNameTaken = errors.New("Name of product already exists")
 var ErrCategorySlugTaken = errors.New("The slug of category already exists")
 var ErrCategoryNameTaken = errors.New("The name of category already exists")
 var ErrInvalidPrice = errors.New("The price is invalid")
-var ErrInvalidStock = errors.New("The stock cannot be negativo ")
 var ErrInsufficientStock = errors.New("Stock Insufficient")
 
 type Repository struct {

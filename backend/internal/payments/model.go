@@ -1,12 +1,13 @@
-package payments 
-import (
+package payments
 
+import (
+	"time"
+
+	"github.com/google/uuid"
 	"gorm.io/gorm"
-	"net/http"
 )
 
-type Payment struct 
-{
+type Payment struct {
 	ID             uuid.UUID `gorm:"type:uuid;primaryKey;default:gen_random_uuid()" json:"id"`
 	OrderID        uuid.UUID `gorm:"type:uuid;not null" json:"order_id"`
 	AmountCents    int       `gorm:"not null" json:"amount_cents"`
@@ -18,13 +19,15 @@ type Payment struct
 	CreatedAt      time.Time `json:"created_at"`
 	UpdatedAt      time.Time `json:"updated_at"`
 }
+
 func (Payment) TableName() string {
 	return "payments"
 }
-func (p *Payment) BeforeCreated(tx *gorm.DB) error
-{
+
+// Cambiado a BeforeCreate (singular) y corregido == por =
+func (p *Payment) BeforeCreate(tx *gorm.DB) error {
 	if p.ID == uuid.Nil {
-		p.ID == uuid.New()
+		p.ID = uuid.New()
 	}
 	return nil
 }
