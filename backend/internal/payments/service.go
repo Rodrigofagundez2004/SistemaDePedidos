@@ -20,6 +20,6 @@ func NewService(repo *Repository, ordersClient OrdersClient) *Service {
 }
 
 func (s *Service) CreatePayment (req *CreatePaymentRequest) (*PaymentResponse, error) {
-
+	existing, err := 
 
 }

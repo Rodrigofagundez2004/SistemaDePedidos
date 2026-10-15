@@ -5,11 +5,11 @@ import (
 )
 var ErrPaymentNotFoundDB = errors.New("Payment not found")
 type  Repository struct {
-	db *gorm.Db
+	db *gorm.DB
 } 
 func newRepository(db *gorm.DB) *Repository {
 
-	return &Repository(db: db)
+	return &Repository{db: db}
 }
 func (r *Repository) Create(p *Payment) error {
 	return r.db.Create(p).Error
@@ -17,7 +17,7 @@ func (r *Repository) Create(p *Payment) error {
 func (r *Repository) Update(p *Payment) error {
 	return r.db.Save(p).Error
 }
-func (r *Repository) FindByIDl(id string) (*Payment, error) 
+func (r *Repository) FindByID(id string) (*Payment, error) 
 {
 	var p Payment
 	err := r.db.Where("id = ?", id).First(&p).Error; err != nil {
@@ -39,22 +39,19 @@ func (r *Repository) FindByIdempotencyKey(key string) (*Payment, error) {
 	return &p, nil
 	 
 }
-func (r *Repository) ListByOrder(orderID string) ([]Payment, error)
-{
+func (r *Repository) ListByOrder(orderID string) ([]Payment, error) {
 	var payments []Payment
-	if err := r.db.Where("order_id = ?", orderID).Order("created_at DESC").Find(&payments).Error
+	err := r.db.Where("order_id = ?", orderID).Order("created_at DESC").Find(&payments).Error
 	if err != nil {
 		return nil, err
 	}
 	return payments, nil
-
-
 }
-func (r *Repository) ListByOrderAsc(orderID string ) ([]Payment, error) {
-	var payment []Payment
-	if err := r.db.Where("order_id = ?", orderID).Order("created_at ASC").Find(%payments).Error 
+func (r *Repository) ListByOrderAsc(orderID string) ([]Payment, error) {
+	var payments []Payment
+	err := r.db.Where("order_id = ?", orderID).Order("created_at ASC").Find(&payments).Error
 	if err != nil {
-		return nil. err
+		return nil, err
 	}
 	return payments, nil
 }
