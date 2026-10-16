@@ -1,6 +1,7 @@
 package payments
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -46,24 +47,34 @@ func (c *HTTPOrdersClient) GetOrder(orderID string) (*OrderInfo, error) {
 		return nil, fmt.Errorf("unexpected status: %d", resp.StatusCode)
 	}
 
-	var order OrderInfo
-	if err := json.NewDecoder(resp.Body).Decode(&order); err != nil {
+	// La respuesta viene como {order: {...}, items: [...]}
+	var wrapper struct {
+		Order OrderInfo `json:"order"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&wrapper); err != nil {
 		return nil, err
 	}
-	return &order, nil
+	return &wrapper.Order, nil
 }
 
 func (c *HTTPOrdersClient) UpdateOrderStatus(orderID, status string) error {
 	url := fmt.Sprintf("%s/orders/%s/status", c.baseURL, orderID)
-	body := fmt.Sprintf(`{"status":"%s"}`, status)
+	body, _ := json.Marshal(map[string]string{"status": status})
 
-	req, err := http.NewRequest(http.MethodPatch, url, nil)
+	req, err := http.NewRequest(http.MethodPatch, url, bytes.NewBuffer(body))
 	if err != nil {
 		return err
 	}
-	// (ajustá según cómo lo implementes en Orders)
-	_ = body
-	_ = req
+	req.Header.Set("Content-Type", "application/json")
 
+	resp, err := c.client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("unexpected status: %d", resp.StatusCode)
+	}
 	return nil
 }

@@ -10,6 +10,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/RodrigoFagundez2004/SistemaDePedidos/backend/internal/auth"
 	"github.com/RodrigoFagundez2004/SistemaDePedidos/backend/internal/config"
 	"github.com/RodrigoFagundez2004/SistemaDePedidos/backend/internal/database"
 	"github.com/RodrigoFagundez2004/SistemaDePedidos/backend/internal/middleware"
@@ -34,7 +35,6 @@ func main() {
 	// 2. Cargar configuración desde .env
 	// ---------------------------------------------------------
 	cfg, err := config.Load()
-	slog.Info("debug", "pass_len", len(cfg.DBPassword), "host", cfg.DBHost)
 	if err != nil {
 		slog.Error("error cargando configuración", "error", err)
 		os.Exit(1)
@@ -81,10 +81,22 @@ func main() {
 	// ---------------------------------------------------------
 	api := router.Group("/api/v1")
 
+	// Validador de JWT compartido (para Orders y Payments)
+	jwtValidator := auth.NewJWTValidator(cfg.JWTSecret)
+
+	// Users — usa su propio Service como validador
 	users.NewHandler(conns.Users, cfg.JWTSecret, cfg.JWTExpirationHour).RegisterRoutes(api)
+
+	// Products — público
 	products.NewHandler(conns.Products).RegisterRoutes(api)
-	orders.NewHandler(conns.Orders).RegisterRoutes(api)
-	payments.NewHandler(conns.Payments).RegisterRoutes(api)
+
+	// Orders — recibe el jwtValidator
+	productsClient := orders.NewHTTPProductsClient("http://localhost:8080/api/v1")
+	orders.NewHandler(conns.Orders, productsClient).RegisterRoutes(api, jwtValidator)
+
+	// Payments — recibe el jwtValidator
+	ordersClient := payments.NewHTTPOrdersClient("http://localhost:8080/api/v1")
+	payments.NewHandler(conns.Payments, ordersClient).RegisterRoutes(api, jwtValidator)
 
 	// ---------------------------------------------------------
 	// 7. Servidor HTTP con graceful shutdown
