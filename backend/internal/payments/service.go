@@ -31,7 +31,9 @@ func NewService(repo *Repository, ordersClient OrdersClient) *Service {
 	}
 }
 
-func (s *Service) CreatePayment(req *CreatePaymentRequest) (*PaymentResponse, error) {
+// CreatePayment cobra una orden. authHeader es el token del usuario que hace la compra;
+// se reenvía a Orders para que acepte la consulta y el cambio de estado.
+func (s *Service) CreatePayment(req *CreatePaymentRequest, authHeader string) (*PaymentResponse, error) {
 	existing, err := s.repo.FindByIdempotencyKey(req.IdempotencyKey)
 	if err == nil {
 		// Si existe una orden con id distinto que
@@ -40,14 +42,16 @@ func (s *Service) CreatePayment(req *CreatePaymentRequest) (*PaymentResponse, er
 		}
 		return ToPaymentResponse(existing), nil
 	}
-	//consultar el orden
-	order, err := s.ordersClient.GetOrder(req.OrderID)
+
+	// consultar la orden
+	order, err := s.ordersClient.GetOrder(req.OrderID, authHeader)
 	if err != nil {
 		if err == ErrOrderNotFound {
 			return nil, ErrOrderNotFound
 		}
 		return nil, ErrOrdersServiceUnavailable
 	}
+
 	// validar estado
 	if order.Status == "paid" {
 		return nil, ErrOrderAlreadyPaid
@@ -55,23 +59,25 @@ func (s *Service) CreatePayment(req *CreatePaymentRequest) (*PaymentResponse, er
 	if order.Status != "pending" {
 		return nil, ErrOrderNotPending
 	}
+
 	payment := &Payment{
 		ID:             uuid.New(),
 		OrderID:        uuid.MustParse(req.OrderID),
-		AmountCents:    order.TotalCents, //  ¡Sácalo de la orden que consultaste antes! (ajusta el nombre si tu struct de orden lo llama diferente, ej: order.Amount, order.AmountCents, etc.)
-		Currency:       order.Currency,   //  Igualmente la moneda viene de la orden
+		AmountCents:    order.TotalCents,
+		Currency:       order.Currency,
 		Status:         "pending",
 		Provider:       "mock",
-		IdempotencyKey: req.IdempotencyKey, // Clave de idempotencia para evitar duplicados
+		IdempotencyKey: req.IdempotencyKey,
 	}
 	if err := s.repo.Create(payment); err != nil {
 		return nil, err
 	}
-	// 6. Simular cobro
+
+	// simular cobro
 	if simulateSuccess() {
 		payment.Status = "succeeded"
 		payment.ProviderRef = "mock_" + uuid.New().String()
-		if err := s.ordersClient.UpdateOrderStatus(req.OrderID, "paid"); err != nil {
+		if err := s.ordersClient.UpdateOrderStatus(req.OrderID, "paid", authHeader); err != nil {
 			slog.Error("pago exitoso pero orden no actualizada",
 				"order_id", req.OrderID,
 				"payment_id", payment.ID,
@@ -80,16 +86,15 @@ func (s *Service) CreatePayment(req *CreatePaymentRequest) (*PaymentResponse, er
 		}
 	} else {
 		payment.Status = "failed"
-		s.ordersClient.UpdateOrderStatus(req.OrderID, "failed")
+		s.ordersClient.UpdateOrderStatus(req.OrderID, "failed", authHeader)
 	}
 
-	// 7. Actualizar
+	// actualizar el pago con el resultado
 	if err := s.repo.Update(payment); err != nil {
 		return nil, err
 	}
 
 	return ToPaymentResponse(payment), nil
-
 }
 
 func (s *Service) GetByID(id string) (*Payment, error) {

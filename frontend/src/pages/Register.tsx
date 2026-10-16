@@ -25,7 +25,7 @@ export default function Register() {
         full_name: fullName,
       });
       login(data.token, data.user);
-      navigate("/dashboard");
+      navigate("/");
     } catch (err: any) {
       setError(err.response?.data?.error || "Error al registrarse");
     } finally {
@@ -36,7 +36,7 @@ export default function Register() {
   return (
     <div className="auth-container">
     <h1 className="app-title">RodriShop</h1>
-    <h2 className="page-title">Iniciar sesión</h2>
+    <h2 className="page-title">Crear cuenta</h2>
       <form onSubmit={handleSubmit}>
         <input
           type="text"

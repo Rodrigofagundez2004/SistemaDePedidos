@@ -37,7 +37,7 @@ func (h *Handler) Create(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.service.CreatePayment(&req)
+	resp, err := h.service.CreatePayment(&req, c.GetHeader("Authorization"))
 	if err != nil {
 		switch {
 		case errors.Is(err, ErrOrderNotFound):

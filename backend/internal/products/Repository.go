@@ -92,10 +92,10 @@ func (r *Repository) UpdateProduct(p *Product) error {
 }
 
 func (r *Repository) ListProducts(q ListProductsQuery) ([]Product, int64, error) {
-	query := r.db.Model(&Product{})
+	query := r.db.Model(&Product{}).Where("is_active = ?", true)
 
 	if q.Category != "" {
-		query = query.Where("category_id", q.Category)
+		query = query.Where("category_id = ?", q.Category)
 	}
 	if q.Search != "" {
 		query = query.Where("name ILIKE ?", "%"+q.Search+"%")
@@ -122,6 +122,7 @@ func (r *Repository) ListProducts(q ListProductsQuery) ([]Product, int64, error)
 	default:
 		query = query.Order("created_at ASC")
 	}
+
 	// Paginación
 	offset := (q.Page - 1) * q.Limit
 	query = query.Limit(q.Limit).Offset(offset)

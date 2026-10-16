@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import api from "../api/client";
 import { useAuth } from "../auth/useAuth";
 
@@ -10,6 +10,8 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = (location.state as { from?: string } | null)?.from ?? "/";
   const login = useAuth((s) => s.login);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -20,7 +22,7 @@ export default function Login() {
     try {
       const { data } = await api.post("/auth/login", { email, password });
       login(data.token, data.user);
-      navigate("/dashboard");
+      navigate(from);
     } catch (err: any) {
       setError(err.response?.data?.error || "Email o contraseña incorrectos");
     } finally {

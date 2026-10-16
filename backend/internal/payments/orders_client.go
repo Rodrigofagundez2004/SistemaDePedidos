@@ -9,8 +9,8 @@ import (
 )
 
 type OrdersClient interface {
-	GetOrder(orderID string) (*OrderInfo, error)
-	UpdateOrderStatus(orderID, status string) error
+	GetOrder(orderID, authHeader string) (*OrderInfo, error)
+	UpdateOrderStatus(orderID, status, authHeader string) error
 }
 
 type OrderInfo struct {
@@ -32,9 +32,16 @@ func NewHTTPOrdersClient(baseURL string) *HTTPOrdersClient {
 	}
 }
 
-func (c *HTTPOrdersClient) GetOrder(orderID string) (*OrderInfo, error) {
+func (c *HTTPOrdersClient) GetOrder(orderID, authHeader string) (*OrderInfo, error) {
 	url := fmt.Sprintf("%s/orders/%s", c.baseURL, orderID)
-	resp, err := c.client.Get(url)
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return nil, err
+	}
+	if authHeader != "" {
+		req.Header.Set("Authorization", authHeader)
+	}
+	resp, err := c.client.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +64,7 @@ func (c *HTTPOrdersClient) GetOrder(orderID string) (*OrderInfo, error) {
 	return &wrapper.Order, nil
 }
 
-func (c *HTTPOrdersClient) UpdateOrderStatus(orderID, status string) error {
+func (c *HTTPOrdersClient) UpdateOrderStatus(orderID, status, authHeader string) error {
 	url := fmt.Sprintf("%s/orders/%s/status", c.baseURL, orderID)
 	body, _ := json.Marshal(map[string]string{"status": status})
 
@@ -66,6 +73,9 @@ func (c *HTTPOrdersClient) UpdateOrderStatus(orderID, status string) error {
 		return err
 	}
 	req.Header.Set("Content-Type", "application/json")
+	if authHeader != "" {
+		req.Header.Set("Authorization", authHeader)
+	}
 
 	resp, err := c.client.Do(req)
 	if err != nil {
