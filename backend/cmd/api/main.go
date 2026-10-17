@@ -7,13 +7,16 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
 	"github.com/RodrigoFagundez2004/SistemaDePedidos/backend/internal/auth"
 	"github.com/RodrigoFagundez2004/SistemaDePedidos/backend/internal/config"
 	"github.com/RodrigoFagundez2004/SistemaDePedidos/backend/internal/database"
+	"github.com/RodrigoFagundez2004/SistemaDePedidos/backend/internal/events"
 	"github.com/RodrigoFagundez2004/SistemaDePedidos/backend/internal/middleware"
+	"github.com/RodrigoFagundez2004/SistemaDePedidos/backend/internal/notifications"
 	"github.com/RodrigoFagundez2004/SistemaDePedidos/backend/internal/orders"
 	"github.com/RodrigoFagundez2004/SistemaDePedidos/backend/internal/payments"
 	"github.com/RodrigoFagundez2004/SistemaDePedidos/backend/internal/products"
@@ -102,9 +105,20 @@ func main() {
 	productsClient := orders.NewHTTPProductsClient("http://localhost:8080/api/v1")
 	orders.NewHandler(conns.Orders, productsClient).RegisterRoutes(api, jwtValidator)
 
-	// Payments — recibe el jwtValidator
+	// Kafka: publicador de eventos (lo usa Payments) y consumidor de ejemplo.
+	kafkaBrokers := strings.Split(cfg.KafkaBrokers, ",")
+	publisher := events.NewPublisher(kafkaBrokers)
+	defer publisher.Close()
+
+	// Payments — recibe el jwtValidator y el publicador de eventos
 	ordersClient := payments.NewHTTPOrdersClient("http://localhost:8080/api/v1")
-	payments.NewHandler(conns.Payments, ordersClient).RegisterRoutes(api, jwtValidator)
+	payments.NewHandler(conns.Payments, ordersClient, publisher).RegisterRoutes(api, jwtValidator)
+
+	// Consumidor: cada pedido pagado dispara el email de confirmación (simulado).
+	// Corre en segundo plano y se detiene al apagar el servidor.
+	consumerCtx, stopConsumer := context.WithCancel(context.Background())
+	defer stopConsumer()
+	go events.ConsumeOrderPaid(consumerCtx, kafkaBrokers, "notifications", notifications.SendPaymentConfirmation)
 
 	// ---------------------------------------------------------
 	// 7. Servidor HTTP con graceful shutdown
@@ -138,6 +152,7 @@ func main() {
 	}
 	slog.Info("servidor apagado correctamente")
 }
+
 func migrate(conns *database.Connections) error {
 	if err := conns.Users.AutoMigrate(&users.User{}); err != nil {
 		return err

@@ -1,10 +1,13 @@
 package payments
 
 import (
+	"context"
 	"errors"
 	"log/slog"
 	"math/rand"
+	"time"
 
+	"github.com/RodrigoFagundez2004/SistemaDePedidos/backend/internal/events"
 	"github.com/google/uuid"
 )
 
@@ -19,15 +22,22 @@ var (
 	ErrOrdersServiceUnavailable = errors.New("servicio de órdenes no disponible")
 )
 
+// OrderPaidPublisher publica el evento cuando un pedido queda pagado (lo implementa events.Publisher).
+type OrderPaidPublisher interface {
+	PublishOrderPaid(ctx context.Context, ev events.OrderPaid) error
+}
+
 type Service struct {
 	repo         *Repository
 	ordersClient OrdersClient
+	publisher    OrderPaidPublisher
 }
 
-func NewService(repo *Repository, ordersClient OrdersClient) *Service {
+func NewService(repo *Repository, ordersClient OrdersClient, publisher OrderPaidPublisher) *Service {
 	return &Service{
 		repo:         repo,
 		ordersClient: ordersClient,
+		publisher:    publisher,
 	}
 }
 
@@ -83,6 +93,8 @@ func (s *Service) CreatePayment(req *CreatePaymentRequest, authHeader string) (*
 				"payment_id", payment.ID,
 				"error", err,
 			)
+		} else {
+			s.publishOrderPaid(order, payment)
 		}
 	} else {
 		payment.Status = "failed"
@@ -107,4 +119,27 @@ func (s *Service) ListByOrder(orderID string) ([]Payment, error) {
 
 func simulateSuccess() bool {
 	return rand.Intn(100) < 90
+}
+
+// publishOrderPaid avisa por Kafka que el pedido quedó pagado.
+// Si Kafka falla, el pago igual queda aprobado: solo se registra el error.
+func (s *Service) publishOrderPaid(order *OrderInfo, payment *Payment) {
+	if s.publisher == nil {
+		return
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	ev := events.OrderPaid{
+		OrderID:     order.ID,
+		UserID:      order.UserID,
+		PaymentID:   payment.ID.String(),
+		AmountCents: payment.AmountCents,
+		Currency:    payment.Currency,
+		PaidAt:      time.Now().UTC(),
+	}
+	if err := s.publisher.PublishOrderPaid(ctx, ev); err != nil {
+		slog.Error("pago aprobado pero no se pudo publicar el evento",
+			"order_id", order.ID, "error", err)
+	}
 }

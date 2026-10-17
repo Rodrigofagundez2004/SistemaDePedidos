@@ -15,6 +15,7 @@ type OrdersClient interface {
 
 type OrderInfo struct {
 	ID         string `json:"id"`
+	UserID     string `json:"user_id"`
 	Status     string `json:"status"`
 	TotalCents int    `json:"total_cents"`
 	Currency   string `json:"currency"`

@@ -22,6 +22,7 @@ type Config struct {
 	PaymentsDBName    string
 	JWTSecret         string
 	JWTExpirationHour int
+	KafkaBrokers      string // lista separada por comas, por ejemplo "localhost:9094"
 }
 
 func Load() (*Config, error) {
@@ -46,6 +47,7 @@ func Load() (*Config, error) {
 		PaymentsDBName:    getEnv("PAYMENTS_DB_NAME", "payments_db"),
 		JWTSecret:         getEnv("JWT_SECRET", "dev_secret"),
 		JWTExpirationHour: expHours,
+		KafkaBrokers:      getEnv("KAFKA_BROKERS", "localhost:9094"),
 	}
 
 	return cfg, nil

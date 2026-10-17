@@ -14,9 +14,9 @@ type Handler struct {
 	service *Service
 }
 
-func NewHandler(db *gorm.DB, ordersClient OrdersClient) *Handler {
+func NewHandler(db *gorm.DB, ordersClient OrdersClient, publisher OrderPaidPublisher) *Handler {
 	repo := NewRepository(db)
-	service := NewService(repo, ordersClient)
+	service := NewService(repo, ordersClient, publisher)
 	return &Handler{service: service}
 }
 
