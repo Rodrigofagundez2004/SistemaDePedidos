@@ -50,6 +50,14 @@ func main() {
 		os.Exit(1)
 	}
 
+	if os.Getenv("RUN_MIGRATIONS") == "true" {
+		if err := migrate(conns); err != nil {
+			slog.Error("error en migraciones", "error", err)
+			os.Exit(1)
+		}
+		slog.Info("migraciones aplicadas")
+	}
+
 	// ---------------------------------------------------------
 	// 4. Crear el router de Gin
 	// ---------------------------------------------------------
@@ -129,4 +137,16 @@ func main() {
 		slog.Error("error al apagar", "error", err)
 	}
 	slog.Info("servidor apagado correctamente")
+}
+func migrate(conns *database.Connections) error {
+	if err := conns.Users.AutoMigrate(&users.User{}); err != nil {
+		return err
+	}
+	if err := conns.Products.AutoMigrate(&products.Category{}, &products.Product{}); err != nil {
+		return err
+	}
+	if err := conns.Orders.AutoMigrate(&orders.Order{}, &orders.OrderItem{}); err != nil {
+		return err
+	}
+	return conns.Payments.AutoMigrate(&payments.Payment{})
 }

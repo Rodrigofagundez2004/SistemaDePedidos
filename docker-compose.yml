@@ -1,0 +1,103 @@
+# Dos formas de correrlo:
+#
+#  1) Todo en Docker (ideal para probar el proyecto, no hace falta instalar Postgres):
+#       docker compose --profile db up --build
+#     Frontend: http://localhost:3000   Backend: http://localhost:8080/health
+#
+#  2) Backend en Docker contra TU Postgres local (pgAdmin), ver readme:
+#       docker compose --profile local up --build
+
+x-backend-env: &backend-env
+  APP_PORT: "8080"
+  APP_ENV: ${APP_ENV:-development}
+  DB_PORT: "5432"
+  DB_USER: ${DB_USER:-postgres}
+  DB_PASSWORD: ${DB_PASSWORD:-postgres}
+  DB_SSLMODE: disable
+  USERS_DB_NAME: users_db
+  PRODUCTS_DB_NAME: products_db
+  ORDERS_DB_NAME: orders_db
+  PAYMENTS_DB_NAME: payments_db
+  JWT_SECRET: ${JWT_SECRET:-change_me_dev_secret}
+  JWT_EXPIRATION_HOURS: ${JWT_EXPIRATION_HOURS:-24}
+
+services:
+  # --- Perfil "db": todo en contenedores -------------------------------
+  postgres:
+    image: postgres:16-alpine
+    profiles: ["db"]
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_DB: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend-db:
+    build: ./backend
+    profiles: ["db"]
+    ports:
+      - "8080:8080"
+    environment:
+      <<: *backend-env
+      DB_HOST: postgres
+      RUN_MIGRATIONS: "true"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  seed:
+    image: postgres:16-alpine
+    profiles: ["db"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      backend-db:
+        condition: service_healthy
+    environment:
+      PGPASSWORD: ${DB_PASSWORD:-postgres}
+    volumes:
+      - ./docker/postgres/seed:/seed:ro
+    entrypoint: ["psql", "-h", "postgres", "-U", "${DB_USER:-postgres}", "-d", "products_db", "-v", "ON_ERROR_STOP=1", "-f", "/seed/seed-products.sql"]
+    restart: "no"
+
+  # --- Perfil "local": backend en Docker contra tu Postgres ------------
+  backend:
+    build: ./backend
+    profiles: ["local"]
+    ports:
+      - "8080:8080"
+    environment:
+      <<: *backend-env
+      DB_HOST: ${DOCKER_DB_HOST:-host.docker.internal}
+      RUN_MIGRATIONS: ${RUN_MIGRATIONS:-false}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+
+  # --- Siempre: frontend ----------------------------------------------
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:8080/api/v1}
+    ports:
+      - "3000:80"
+    restart: unless-stopped
+
+volumes:
+  pgdata:
